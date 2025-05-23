@@ -2,13 +2,12 @@
 session_start();
 include 'includes/auth.php';
 
-
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
 
-$mysqli = new mysqli("localhost", "root", "ton_mot_de_passe", "php_exam_db");
+$mysqli = new mysqli("localhost", "root", "root", "php_exam_db");
 if ($mysqli->connect_error) {
     die("Erreur de connexion : " . $mysqli->connect_error);
 }

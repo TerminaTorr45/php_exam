@@ -2,7 +2,7 @@
 session_start();
 
 // Connexion à la base
-$mysqli = new mysqli("localhost", "root", "ton_mot_de_passe", "php_exam_db");
+$mysqli = new mysqli("localhost", "root", "root", "php_exam_db");
 if ($mysqli->connect_error) {
     die("Erreur de connexion : " . $mysqli->connect_error);
 }
