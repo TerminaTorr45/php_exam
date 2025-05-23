@@ -34,6 +34,7 @@ CREATE TABLE Cart (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     article_id INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
     FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE,
     FOREIGN KEY (article_id) REFERENCES Article(id) ON DELETE CASCADE
 );
