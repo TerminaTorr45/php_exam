@@ -10,7 +10,7 @@ if ($mysqli->connect_error) {
 // Récupère l'ID de l'article depuis l'URL
 $article_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
-// Récupération des infos de l’article
+// Récupération des infos de l'article
 $stmt = $mysqli->prepare("
     SELECT A.*, U.username AS author, S.quantity 
     FROM Article A 

@@ -1,7 +1,7 @@
 <?php
 // admin/users.php
 session_start();
-$mysqli = new mysqli("localhost", "root", "root", "php_exam_db");
+$mysqli = new mysqli("localhost", "root", "", "php_exam_db");
 if ($mysqli->connect_error) die("Erreur de connexion: " . $mysqli->connect_error);
 
 $current_user_id = $_SESSION['user_id'] ?? null;
@@ -40,21 +40,6 @@ $users = $mysqli->query("SELECT * FROM User ORDER BY created_at DESC");
 
 <?php
 // admin/articles.php
-session_start();
-$mysqli = new mysqli("localhost", "root", "ton_mot_de_passe", "php_exam_db");
-if ($mysqli->connect_error) die("Erreur de connexion: " . $mysqli->connect_error);
-
-$current_user_id = $_SESSION['user_id'] ?? null;
-$user_query = $mysqli->query("SELECT * FROM User WHERE id = $current_user_id");
-if (!$current_user_id || $user_query->num_rows === 0) die("Accès refusé");
-$user = $user_query->fetch_assoc();
-if ($user['role'] !== 'admin') die("Accès refusé");
-
-if (isset($_GET['delete'])) {
-    $delete_id = intval($_GET['delete']);
-    $mysqli->query("DELETE FROM Article WHERE id = $delete_id");
-}
-
 $articles = $mysqli->query("SELECT A.*, U.username FROM Article A LEFT JOIN User U ON A.author_id = U.id ORDER BY published_at DESC");
 ?>
 <h1>Gestion des articles</h1>

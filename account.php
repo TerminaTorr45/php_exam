@@ -1,8 +1,7 @@
 <?php
-session_start();
 include 'includes/auth.php';
 
-$mysqli = new mysqli("localhost", "root", "root", "php_exam_db");
+$mysqli = new mysqli("localhost", "root", "", "php_exam_db");
 if ($mysqli->connect_error) {
     die("Erreur de connexion: " . $mysqli->connect_error);
 }
@@ -28,8 +27,8 @@ $user = $user_query->fetch_assoc();
 
 // Mise à jour email ou mot de passe
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_owner) {
-    $email = $mysqli->real_escape_string($_POST['email']);
-    $password = $mysqli->real_escape_string($_POST['password']);
+    $email = isset($_POST['email']) ? $mysqli->real_escape_string($_POST['email']) : '';
+    $password = isset($_POST['password']) ? $mysqli->real_escape_string($_POST['password']) : '';
     if (!empty($email)) {
         $mysqli->query("UPDATE User SET email = '$email' WHERE id = $current_user_id");
     }
