@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (!empty($name) && $price > 0 && $quantity >= 0) {
         // Insérer dans la table Article
         $stmt = $mysqli->prepare("INSERT INTO Article (name, description, price, author_id, image_url) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssdiss", $name, $description, $price, $author_id, $image_url);
+        $stmt->bind_param("ssdss", $name, $description, $price, $author_id, $image_url); // ✅ CORRECTION ICI
         $stmt->execute();
 
         $article_id = $stmt->insert_id;
@@ -43,7 +43,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $message = "❌ Merci de remplir tous les champs obligatoires.";
     }
 }
-
 ?>
 
 <!DOCTYPE html>

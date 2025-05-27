@@ -59,6 +59,7 @@ $result = $mysqli->query($query);
             padding: 0.5rem 1rem;
             border: 1px solid white;
             border-radius: 4px;
+            margin-left: 0.5rem;
             transition: all 0.3s ease;
         }
 
@@ -86,6 +87,8 @@ $result = $mysqli->query($query);
             overflow: hidden;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             transition: transform 0.3s ease;
+            text-decoration: none;
+            color: inherit;
         }
 
         .product-card:hover {
@@ -141,7 +144,8 @@ $result = $mysqli->query($query);
     <header class="header">
         <h1>🏠 SNEAKER MARKET</h1>
         <div>
-            <a href="account.php" style="margin-right: 1rem;">Mon compte</a>
+            <a href="sell.php">Vendre</a>
+            <a href="account.php">Mon compte</a>
             <a href="logout.php">Se déconnecter</a>
         </div>
     </header>
@@ -151,7 +155,7 @@ $result = $mysqli->query($query);
             <?php
             if ($result->num_rows > 0) {
                 while ($row = $result->fetch_assoc()) {
-                    echo "<div class='product-card'>";
+                    echo "<a href='detail.php?id=" . $row['id'] . "' class='product-card'>";
                     if (!empty($row['image_url'])) {
                         echo "<img src='" . htmlspecialchars($row['image_url']) . "' alt='" . htmlspecialchars($row['name']) . "' class='product-image'>";
                     } else {
@@ -165,7 +169,7 @@ $result = $mysqli->query($query);
                     echo "Publié par " . htmlspecialchars($row['author']) . " le " . $row['published_at'];
                     echo "</div>";
                     echo "</div>";
-                    echo "</div>";
+                    echo "</a>";
                 }
             } else {
                 echo "<div class='no-products'>Aucun article en vente.</div>";
