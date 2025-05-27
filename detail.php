@@ -2,7 +2,7 @@
 session_start();
 
 // Connexion à la base de données
-$mysqli = new mysqli("localhost", "root", "root", "php_exam_db");
+$mysqli = new mysqli("localhost", "root", "", "php_exam_db");
 if ($mysqli->connect_error) {
     die("Erreur de connexion : " . $mysqli->connect_error);
 }
@@ -59,37 +59,40 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <title>Détail de l'article</title>
+    <link rel="stylesheet" href="styles/detail.css">
 </head>
 <body>
-    <h1>🧾 Détail de l'article</h1>
-    <p><a href="home.php">⬅️ Retour à l'accueil</a></p>
+    <div class="container">
+        <h1>🧾 Détail de l'article</h1>
+        <p><a href="home.php">⬅️ Retour à l'accueil</a></p>
 
-    <?php if ($message): ?>
-        <p><strong><?= htmlspecialchars($message) ?></strong></p>
-    <?php endif; ?>
-
-    <h2><?= htmlspecialchars($article['name']) ?></h2>
-
-    <?php if (!empty($article['image_url'])): ?>
-        <img src="<?= htmlspecialchars($article['image_url']) ?>" alt="Image" width="300"><br>
-    <?php endif; ?>
-
-    <p><strong>Prix :</strong> <?= number_format($article['price'], 2) ?> €</p>
-    <p><strong>Description :</strong> <?= nl2br(htmlspecialchars($article['description'])) ?></p>
-    <p><strong>Auteur :</strong> <?= htmlspecialchars($article['author']) ?></p>
-    <p><strong>Date de publication :</strong> <?= $article['published_at'] ?></p>
-    <p><strong>Stock disponible :</strong> <?= $article['quantity'] ?></p>
-
-    <?php if (isset($_SESSION['user_id'])): ?>
-        <?php if ($article['quantity'] > 0): ?>
-            <form method="POST">
-                <button type="submit">🛒 Ajouter au panier</button>
-            </form>
-        <?php else: ?>
-            <p style="color:red;"><strong>Rupture de stock.</strong></p>
+        <?php if ($message): ?>
+            <p><strong><?= htmlspecialchars($message) ?></strong></p>
         <?php endif; ?>
-    <?php else: ?>
-        <p><a href="login.php">Connectez-vous</a> pour ajouter cet article à votre panier.</p>
-    <?php endif; ?>
+
+        <h2><?= htmlspecialchars($article['name']) ?></h2>
+
+        <?php if (!empty($article['image_url'])): ?>
+            <img src="<?= htmlspecialchars($article['image_url']) ?>" alt="Image de l'article"><br>
+        <?php endif; ?>
+
+        <p><strong>Prix :</strong> <?= number_format($article['price'], 2) ?> €</p>
+        <p><strong>Description :</strong> <?= nl2br(htmlspecialchars($article['description'])) ?></p>
+        <p><strong>Auteur :</strong> <?= htmlspecialchars($article['author']) ?></p>
+        <p><strong>Date de publication :</strong> <?= $article['published_at'] ?></p>
+        <p><strong>Stock disponible :</strong> <?= $article['quantity'] ?></p>
+
+        <?php if (isset($_SESSION['user_id'])): ?>
+            <?php if ($article['quantity'] > 0): ?>
+                <form method="POST">
+                    <button type="submit">🛒 Ajouter au panier</button>
+                </form>
+            <?php else: ?>
+                <p style="color:red;"><strong>Rupture de stock.</strong></p>
+            <?php endif; ?>
+        <?php else: ?>
+            <p><a href="login.php">Connectez-vous</a> pour ajouter cet article à votre panier.</p>
+        <?php endif; ?>
+    </div>
 </body>
 </html>

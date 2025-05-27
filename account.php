@@ -157,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <header class="header">
-        <h1>🏠 SNEAKER MARKET</h1>
+        <h1><a href="home.php" style="color: white; text-decoration: none;">🏠 SNEAKER MARKET</a></h1>
         <div>
             <a href="home.php" style="margin-right: 1rem;">Accueil</a>
             <a href="logout.php">Se déconnecter</a>
