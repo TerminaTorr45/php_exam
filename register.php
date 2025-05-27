@@ -122,6 +122,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             transform: translateY(0);
         }
 
+        .login-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .login-link a {
+            color: rgb(59, 181, 48);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .login-link a:hover {
+            color: rgb(44, 44, 44);
+        }
+
         @media (max-width: 480px) {
             .container {
                 margin: 1rem;
@@ -140,6 +156,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <input type="password" name="password" placeholder="Mot de passe" required>
             <button type="submit">S'inscrire</button>
         </form>
+        <div class="login-link">
+            <a href="login.php">Déjà inscrit ? Connectez-vous ici</a>
+        </div>
     </div>
 </body>
 </html>

@@ -140,7 +140,10 @@ $result = $mysqli->query($query);
 <body>
     <header class="header">
         <h1>🏠 SNEAKER MARKET</h1>
-        <a href="logout.php">Se déconnecter</a>
+        <div>
+            <a href="account.php" style="margin-right: 1rem;">Mon compte</a>
+            <a href="logout.php">Se déconnecter</a>
+        </div>
     </header>
 
     <div class="container">

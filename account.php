@@ -1,136 +1,193 @@
 <?php
-include 'includes/auth.php';
+session_start();
 
+// Vérification si l'utilisateur est connecté
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit();
+}
+
+// Connexion à la base de données
 $mysqli = new mysqli("localhost", "root", "", "php_exam_db");
 if ($mysqli->connect_error) {
-    die("Erreur de connexion: " . $mysqli->connect_error);
+    die("Erreur de connexion : " . $mysqli->connect_error);
 }
 
-$current_user_id = $_SESSION['user_id'] ?? null;
-$viewed_user_id = $_GET['id'] ?? $current_user_id;
+// Récupération des informations de l'utilisateur
+$user_id = $_SESSION['user_id'];
+$query = "SELECT * FROM User WHERE id = ?";
+$stmt = $mysqli->prepare($query);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
 
-if (!$viewed_user_id) {
-    echo "Vous devez être connecté pour accéder à cette page.";
-    exit;
-}
-
-$viewed_user_id = intval($viewed_user_id);
-$is_owner = $current_user_id && $current_user_id == $viewed_user_id;
-
-// Récupération des infos utilisateur
-$user_query = $mysqli->query("SELECT * FROM User WHERE id = $viewed_user_id");
-if ($user_query->num_rows === 0) {
-    echo "Utilisateur introuvable.";
-    exit;
-}
-$user = $user_query->fetch_assoc();
-
-// Mise à jour email ou mot de passe
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_owner) {
-    $email = isset($_POST['email']) ? $mysqli->real_escape_string($_POST['email']) : '';
-    $password = isset($_POST['password']) ? $mysqli->real_escape_string($_POST['password']) : '';
-    if (!empty($email)) {
-        $mysqli->query("UPDATE User SET email = '$email' WHERE id = $current_user_id");
-    }
-    if (!empty($password)) {
-        $hashed = password_hash($password, PASSWORD_DEFAULT);
-        $mysqli->query("UPDATE User SET password = '$hashed' WHERE id = $current_user_id");
-    }
-    echo "<p>Informations mises à jour.</p>";
-    $user = $mysqli->query("SELECT * FROM User WHERE id = $viewed_user_id")->fetch_assoc();
-}
-
-// Ajouter de l'argent au solde
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_funds']) && $is_owner) {
-    $amount = floatval($_POST['amount']);
-    if ($amount > 0) {
-        $mysqli->query("UPDATE User SET balance = balance + $amount WHERE id = $current_user_id");
-        echo "<p>Argent ajouté !</p>";
-        $user = $mysqli->query("SELECT * FROM User WHERE id = $viewed_user_id")->fetch_assoc();
+// Traitement du formulaire de mise à jour
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = $_POST['username'];
+    $email = $_POST['email'];
+    
+    $update_query = "UPDATE User SET username = ?, email = ? WHERE id = ?";
+    $update_stmt = $mysqli->prepare($update_query);
+    $update_stmt->bind_param("ssi", $username, $email, $user_id);
+    
+    if ($update_stmt->execute()) {
+        $success_message = "Vos informations ont été mises à jour avec succès !";
+        // Mise à jour des données affichées
+        $user['username'] = $username;
+        $user['email'] = $email;
+    } else {
+        $error_message = "Une erreur est survenue lors de la mise à jour.";
     }
 }
-
-// Récupérer les articles postés par cet utilisateur
-$articles = $mysqli->query("SELECT * FROM Article WHERE author_id = $viewed_user_id ORDER BY published_at DESC");
-
-// Récupérer les factures si c'est le compte de l'utilisateur actuel
-$invoices = $is_owner ? $mysqli->query("SELECT * FROM Invoice WHERE user_id = $current_user_id") : null;
-
-// Articles achetés (via les factures)
-$purchases = $is_owner ? $mysqli->query(
-    "SELECT A.* FROM Article A
-     JOIN Cart C ON C.article_id = A.id
-     JOIN Invoice I ON I.user_id = C.user_id
-     WHERE C.user_id = $current_user_id"
-) : null;
 ?>
 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profil - <?= htmlspecialchars($user['username']) ?></title>
-    <link rel="stylesheet" href="styles/account.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Mon Compte - SNEAKER MARKET</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background-color: #000;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid white;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .header a:hover {
+            background-color: white;
+            color: black;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            margin-bottom: 2rem;
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: #000;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #333;
+        }
+
+        .message {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
 </head>
 <body>
-    <div class="profile-container">
-        <div class="profile-header">
-            <h2>Profil de <?= htmlspecialchars($user['username']) ?></h2>
-            <div class="profile-info">
-                <div class="info-card">
-                    <p>Email : <?= htmlspecialchars($user['email']) ?></p>
-                </div>
-                <div class="info-card">
-                    <p>Solde : <span class="balance"><?= $user['balance'] ?> €</span></p>
-                </div>
-            </div>
+    <header class="header">
+        <h1>🏠 SNEAKER MARKET</h1>
+        <div>
+            <a href="home.php" style="margin-right: 1rem;">Accueil</a>
+            <a href="logout.php">Se déconnecter</a>
         </div>
+    </header>
 
-        <?php if ($is_owner): ?>
-        <form method="POST">
-            <h3>Modifier mes informations</h3>
-            <label>Email : <input type="email" name="email" value="<?= htmlspecialchars($user['email']) ?>"></label>
-            <label>Mot de passe : <input type="password" name="password"></label>
-            <button type="submit">Mettre à jour</button>
-        </form>
-
-        <form method="POST">
-            <h3>Ajouter de l'argent</h3>
-            <input type="number" name="amount" step="0.01" placeholder="Montant">
-            <button type="submit" name="add_funds">Ajouter</button>
-        </form>
+    <div class="container">
+        <h2>Mon Compte</h2>
+        
+        <?php if (isset($success_message)): ?>
+            <div class="message success"><?php echo $success_message; ?></div>
         <?php endif; ?>
 
-        <h3>Articles postés par <?= htmlspecialchars($user['username']) ?></h3>
-        <div class="articles-grid">
-            <?php while ($row = $articles->fetch_assoc()): ?>
-                <div class="article-card">
-                    <a href="/detail.php?id=<?= $row['id'] ?>"><?= htmlspecialchars($row['name']) ?></a>
-                </div>
-            <?php endwhile; ?>
-        </div>
-
-        <?php if ($is_owner): ?>
-            <h3>Mes achats</h3>
-            <div class="articles-grid">
-                <?php while ($purchases && $row = $purchases->fetch_assoc()): ?>
-                    <div class="article-card">
-                        <p><?= htmlspecialchars($row['name']) ?> - <?= $row['price'] ?> €</p>
-                    </div>
-                <?php endwhile; ?>
-            </div>
-
-            <h3>Mes factures</h3>
-            <div class="articles-grid">
-                <?php while ($invoices && $row = $invoices->fetch_assoc()): ?>
-                    <div class="article-card">
-                        <p>Facture #<?= $row['id'] ?> - <?= $row['amount'] ?> € - <?= $row['transaction_date'] ?></p>
-                    </div>
-                <?php endwhile; ?>
-            </div>
+        <?php if (isset($error_message)): ?>
+            <div class="message error"><?php echo $error_message; ?></div>
         <?php endif; ?>
+
+        <form method="POST" action="">
+            <div class="form-group">
+                <label for="username">Nom d'utilisateur</label>
+                <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($user['username']); ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
+            </div>
+
+            <button type="submit">Mettre à jour mes informations</button>
+        </form>
     </div>
 </body>
 </html>
