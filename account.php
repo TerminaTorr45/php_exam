@@ -65,44 +65,72 @@ $purchases = $is_owner ? $mysqli->query(
 ) : null;
 ?>
 
-<h2>Profil de <?= htmlspecialchars($user['username']) ?></h2>
-<p>Email : <?= htmlspecialchars($user['email']) ?></p>
-<p>Solde : <?= $user['balance'] ?> €</p>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil - <?= htmlspecialchars($user['username']) ?></title>
+    <link rel="stylesheet" href="styles/account.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-header">
+            <h2>Profil de <?= htmlspecialchars($user['username']) ?></h2>
+            <div class="profile-info">
+                <div class="info-card">
+                    <p>Email : <?= htmlspecialchars($user['email']) ?></p>
+                </div>
+                <div class="info-card">
+                    <p>Solde : <span class="balance"><?= $user['balance'] ?> €</span></p>
+                </div>
+            </div>
+        </div>
 
-<?php if ($is_owner): ?>
-<form method="POST">
-    <h3>Modifier mes informations</h3>
-    <label>Email : <input type="email" name="email" value="<?= htmlspecialchars($user['email']) ?>"></label><br>
-    <label>Mot de passe : <input type="password" name="password"></label><br>
-    <button type="submit">Mettre à jour</button>
-</form>
-<br>
-<form method="POST">
-    <h3>Ajouter de l'argent</h3>
-    <input type="number" name="amount" step="0.01" placeholder="Montant">
-    <button type="submit" name="add_funds">Ajouter</button>
-</form>
-<?php endif; ?>
+        <?php if ($is_owner): ?>
+        <form method="POST">
+            <h3>Modifier mes informations</h3>
+            <label>Email : <input type="email" name="email" value="<?= htmlspecialchars($user['email']) ?>"></label>
+            <label>Mot de passe : <input type="password" name="password"></label>
+            <button type="submit">Mettre à jour</button>
+        </form>
 
-<h3>Articles postés par <?= htmlspecialchars($user['username']) ?></h3>
-<ul>
-<?php while ($row = $articles->fetch_assoc()): ?>
-    <li><a href="/detail.php?id=<?= $row['id'] ?>"><?= htmlspecialchars($row['name']) ?></a></li>
-<?php endwhile; ?>
-</ul>
+        <form method="POST">
+            <h3>Ajouter de l'argent</h3>
+            <input type="number" name="amount" step="0.01" placeholder="Montant">
+            <button type="submit" name="add_funds">Ajouter</button>
+        </form>
+        <?php endif; ?>
 
-<?php if ($is_owner): ?>
-    <h3>Mes achats</h3>
-    <ul>
-    <?php while ($purchases && $row = $purchases->fetch_assoc()): ?>
-        <li><?= htmlspecialchars($row['name']) ?> - <?= $row['price'] ?> €</li>
-    <?php endwhile; ?>
-    </ul>
+        <h3>Articles postés par <?= htmlspecialchars($user['username']) ?></h3>
+        <div class="articles-grid">
+            <?php while ($row = $articles->fetch_assoc()): ?>
+                <div class="article-card">
+                    <a href="/detail.php?id=<?= $row['id'] ?>"><?= htmlspecialchars($row['name']) ?></a>
+                </div>
+            <?php endwhile; ?>
+        </div>
 
-    <h3>Mes factures</h3>
-    <ul>
-    <?php while ($invoices && $row = $invoices->fetch_assoc()): ?>
-        <li>Facture #<?= $row['id'] ?> - <?= $row['amount'] ?> € - <?= $row['transaction_date'] ?></li>
-    <?php endwhile; ?>
-    </ul>
-<?php endif; ?>
+        <?php if ($is_owner): ?>
+            <h3>Mes achats</h3>
+            <div class="articles-grid">
+                <?php while ($purchases && $row = $purchases->fetch_assoc()): ?>
+                    <div class="article-card">
+                        <p><?= htmlspecialchars($row['name']) ?> - <?= $row['price'] ?> €</p>
+                    </div>
+                <?php endwhile; ?>
+            </div>
+
+            <h3>Mes factures</h3>
+            <div class="articles-grid">
+                <?php while ($invoices && $row = $invoices->fetch_assoc()): ?>
+                    <div class="article-card">
+                        <p>Facture #<?= $row['id'] ?> - <?= $row['amount'] ?> € - <?= $row['transaction_date'] ?></p>
+                    </div>
+                <?php endwhile; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+</body>
+</html>

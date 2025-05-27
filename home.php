@@ -22,30 +22,155 @@ $result = $mysqli->query($query);
 <head>
     <meta charset="UTF-8">
     <title>Accueil - Articles</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background-color: #000;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid white;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .header a:hover {
+            background-color: white;
+            color: black;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            padding: 1rem;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background-color: #f8f8f8;
+        }
+
+        .product-info {
+            padding: 1.5rem;
+        }
+
+        .product-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-price {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #000;
+            margin: 0.5rem 0;
+        }
+
+        .product-description {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .product-meta {
+            font-size: 0.8rem;
+            color: #888;
+            border-top: 1px solid #eee;
+            padding-top: 1rem;
+        }
+
+        .no-products {
+            text-align: center;
+            padding: 3rem;
+            font-size: 1.2rem;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
-    <h1>🏠 Accueil</h1>
-    <p><a href="logout.php">Se déconnecter</a></p>
-    <hr>
+    <header class="header">
+        <h1>🏠 SNEAKER MARKET</h1>
+        <a href="logout.php">Se déconnecter</a>
+    </header>
 
-    <?php
-    if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            echo "<div style='border:1px solid #ccc; padding:10px; margin:10px 0;'>";
-            echo "<h2>" . htmlspecialchars($row['name']) . "</h2>";
-            if (!empty($row['image_url'])) {
-                echo "<img src='" . htmlspecialchars($row['image_url']) . "' alt='Image' width='200'><br>";
+    <div class="container">
+        <div class="products-grid">
+            <?php
+            if ($result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    echo "<div class='product-card'>";
+                    if (!empty($row['image_url'])) {
+                        echo "<img src='" . htmlspecialchars($row['image_url']) . "' alt='" . htmlspecialchars($row['name']) . "' class='product-image'>";
+                    } else {
+                        echo "<div class='product-image'></div>";
+                    }
+                    echo "<div class='product-info'>";
+                    echo "<h2 class='product-name'>" . htmlspecialchars($row['name']) . "</h2>";
+                    echo "<div class='product-price'>" . number_format($row['price'], 2) . " €</div>";
+                    echo "<p class='product-description'>" . nl2br(htmlspecialchars($row['description'])) . "</p>";
+                    echo "<div class='product-meta'>";
+                    echo "Publié par " . htmlspecialchars($row['author']) . " le " . $row['published_at'];
+                    echo "</div>";
+                    echo "</div>";
+                    echo "</div>";
+                }
+            } else {
+                echo "<div class='no-products'>Aucun article en vente.</div>";
             }
-            echo "<p><strong>Prix:</strong> " . number_format($row['price'], 2) . " €</p>";
-            echo "<p><strong>Description:</strong> " . nl2br(htmlspecialchars($row['description'])) . "</p>";
-            echo "<p><strong>Publié par:</strong> " . htmlspecialchars($row['author']) . " le " . $row['published_at'] . "</p>";
-            echo "</div>";
-        }
-    } else {
-        echo "<p>Aucun article en vente.</p>";
-    }
 
-    $mysqli->close();
-    ?>
+            $mysqli->close();
+            ?>
+        </div>
+    </div>
 </body>
 </html>

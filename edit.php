@@ -73,35 +73,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
         $mysqli->query("INSERT INTO Stock (article_id, quantity) VALUES ($article_id, $stock)");
     }
 
-    echo "<p>Article mis à jour.</p>";
+    echo "<p>Article mis à jour avec succès.</p>";
     $article = $mysqli->query("SELECT * FROM Article WHERE id = $article_id")->fetch_assoc();
 }
 
 $stock_data = $mysqli->query("SELECT quantity FROM Stock WHERE article_id = $article_id")->fetch_assoc();
 $current_stock = $stock_data ? $stock_data['quantity'] : 0;
 ?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier l'article</title>
+    <link rel="stylesheet" href="css/edit.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h2>Modifier l'article</h2>
 
-<h2>Modifier l'article</h2>
+        <form method="POST" class="edit-form">
+            <div class="form-group">
+                <label>Nom :</label>
+                <input type="text" name="name" value="<?= htmlspecialchars($article['name']) ?>" required>
+            </div>
 
-<form method="POST">
-    <label>Nom :</label><br>
-    <input type="text" name="name" value="<?= htmlspecialchars($article['name']) ?>" required><br>
+            <div class="form-group">
+                <label>Description :</label>
+                <textarea name="description"><?= htmlspecialchars($article['description']) ?></textarea>
+            </div>
 
-    <label>Description :</label><br>
-    <textarea name="description"><?= htmlspecialchars($article['description']) ?></textarea><br>
+            <div class="form-group">
+                <label>Prix :</label>
+                <input type="number" name="price" step="0.01" value="<?= $article['price'] ?>" required>
+            </div>
 
-    <label>Prix :</label><br>
-    <input type="number" name="price" step="0.01" value="<?= $article['price'] ?>" required><br>
+            <div class="form-group">
+                <label>URL de l'image :</label>
+                <input type="text" name="image_url" value="<?= htmlspecialchars($article['image_url']) ?>">
+            </div>
 
-    <label>URL de l'image :</label><br>
-    <input type="text" name="image_url" value="<?= htmlspecialchars($article['image_url']) ?>"><br>
+            <div class="form-group">
+                <label>Stock :</label>
+                <input type="number" name="stock" value="<?= $current_stock ?>" required>
+            </div>
 
-    <label>Stock :</label><br>
-    <input type="number" name="stock" value="<?= $current_stock ?>" required><br><br>
+            <button type="submit" name="update">Mettre à jour</button>
+        </form>
 
-    <button type="submit" name="update">Mettre à jour</button>
-</form>
-
-<form method="POST" onsubmit="return confirm('Supprimer cet article ?')">
-    <button type="submit" name="delete" style="margin-top:20px; color:red;">Supprimer l'article</button>
-</form>
+        <form method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet article ?')" class="delete-form">
+            <button type="submit" name="delete">Supprimer l'article</button>
+        </form>
+    </div>
+</body>
+</html>
