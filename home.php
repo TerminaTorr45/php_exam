@@ -159,12 +159,14 @@ $result = $mysqli->query($query);
     <div>
         <a href="sell.php">Vendre</a>
         <a href="account.php">Mon compte</a>
+        <a href="cart.php">🛒 Panier</a> 
         <?php if ($is_admin): ?>
             <a href="admin.php" style="background-color: crimson; color: white;">Admin</a>
         <?php endif; ?>
         <a href="logout.php">Se déconnecter</a>
     </div>
 </header>
+
 
 <div class="container">
     <div class="products-grid">

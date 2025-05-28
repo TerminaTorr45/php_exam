@@ -26,8 +26,8 @@ if (!$user) {
     die("Utilisateur non trouvé.");
 }
 
-// Mise à jour si c’est le propriétaire du compte
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $view_user_id === $current_user_id) {
+// ✅ Mise à jour du profil
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile']) && $view_user_id === $current_user_id) {
     $username = $_POST['username'];
     $email = $_POST['email'];
     $password = !empty($_POST['password']) ? password_hash($_POST['password'], PASSWORD_DEFAULT) : null;
@@ -46,6 +46,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $view_user_id === $current_user_id)
         $user['email'] = $email;
     } else {
         $error_message = "Erreur lors de la mise à jour.";
+    }
+}
+
+// ✅ Ajout d'argent au solde
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_funds']) && $view_user_id === $current_user_id) {
+    $amount = floatval($_POST['amount']);
+    if ($amount > 0) {
+        $update = $mysqli->prepare("UPDATE User SET balance = balance + ? WHERE id = ?");
+        $update->bind_param("di", $amount, $current_user_id);
+        if ($update->execute()) {
+            $stmt = $mysqli->prepare("SELECT * FROM User WHERE id = ?");
+            $stmt->bind_param("i", $view_user_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $user = $result->fetch_assoc();
+
+            $success_message = "Argent ajouté avec succès.";
+        } else {
+            $error_message = "Erreur lors de l'ajout d'argent.";
+        }
+    } else {
+        $error_message = "Montant invalide.";
     }
 }
 
@@ -118,7 +140,8 @@ $articles_result = $articles_stmt->get_result();
 
         input[type="text"],
         input[type="email"],
-        input[type="password"] {
+        input[type="password"],
+        input[type="number"] {
             width: 100%;
             padding: 0.6rem;
             font-size: 1rem;
@@ -188,6 +211,7 @@ $articles_result = $articles_stmt->get_result();
 
     <?php if ($view_user_id === $current_user_id): ?>
         <form method="POST">
+            <input type="hidden" name="update_profile" value="1">
             <div class="form-group">
                 <label for="username">Nom d'utilisateur</label>
                 <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($user['username']); ?>" required>
@@ -207,6 +231,19 @@ $articles_result = $articles_stmt->get_result();
     <?php endif; ?>
 
     <h3>Articles publiés</h3>
+    <h3>Solde : <?php echo number_format($user['balance'], 2, ',', ' '); ?> €</h3>
+
+    <?php if ($view_user_id === $current_user_id): ?>
+        <form method="POST" style="margin-bottom: 2rem;">
+            <input type="hidden" name="add_funds" value="1">
+            <div class="form-group">
+                <label for="amount">Ajouter de l'argent</label>
+                <input type="number" step="0.01" min="0.01" name="amount" id="amount" required>
+            </div>
+            <button type="submit">Ajouter</button>
+        </form>
+    <?php endif; ?>
+
     <ul>
         <?php while ($article = $articles_result->fetch_assoc()): ?>
             <li>
