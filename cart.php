@@ -118,51 +118,66 @@ while ($row = $result->fetch_assoc()) {
 <head>
     <meta charset="UTF-8">
     <title>Mon Panier</title>
+    <link rel="stylesheet" href="styles/cart.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>🛒 Mon Panier</h1>
-    <p><a href="home.php">⬅️ Retour à l'accueil</a></p>
+    <div class="container">
+        <div class="header">
+            <h1 class="cart-title">🛒 Mon Panier</h1>
+            <a href="home.php" class="back-link">⬅️ Retour à l'accueil</a>
+        </div>
 
-    <?php if ($message): ?>
-        <p><strong><?= $message ?></strong></p>
-    <?php endif; ?>
+        <?php if ($message): ?>
+            <div class="message">
+                <strong><?= $message ?></strong>
+            </div>
+        <?php endif; ?>
 
-    <?php if (count($articles) === 0): ?>
-        <p>Votre panier est vide.</p>
-    <?php else: ?>
-        <form method="POST">
-            <table border="1" cellpadding="8">
-                <tr>
-                    <th>Image</th>
-                    <th>Nom</th>
-                    <th>Prix</th>
-                    <th>Quantité</th>
-                    <th>Stock</th>
-                    <th>Total</th>
-                    <th>Action</th>
-                </tr>
-                <?php foreach ($articles as $item): ?>
+        <?php if (count($articles) === 0): ?>
+            <div class="empty-cart">
+                <p>Votre panier est vide.</p>
+            </div>
+        <?php else: ?>
+            <form method="POST">
+                <table class="cart-table">
                     <tr>
-                        <td>
-                            <?php if ($item['image_url']): ?>
-                                <img src="<?= htmlspecialchars($item['image_url']) ?>" width="50">
-                            <?php endif; ?>
-                        </td>
-                        <td><?= htmlspecialchars($item['name']) ?></td>
-                        <td><?= number_format($item['price'], 2) ?> €</td>
-                        <td>
-                            <input type="number" name="quantities[<?= $item['cart_id'] ?>]" value="<?= $item['quantity'] ?>" min="1" max="<?= $item['stock'] ?>">
-                        </td>
-                        <td><?= $item['stock'] ?></td>
-                        <td><?= number_format($item['price'] * $item['quantity'], 2) ?> €</td>
-                        <td><a href="?delete=<?= $item['cart_id'] ?>">❌ Supprimer</a></td>
+                        <th>Image</th>
+                        <th>Nom</th>
+                        <th>Prix</th>
+                        <th>Quantité</th>
+                        <th>Stock</th>
+                        <th>Total</th>
+                        <th>Action</th>
                     </tr>
-                <?php endforeach; ?>
-            </table>
-            <p><strong>Total :</strong> <?= number_format($total, 2) ?> €</p>
-            <button type="submit">🆙 Mettre à jour</button>
-            <a href="/cart/validate.php" style="display:inline-block;padding:8px 12px;background:#4CAF50;color:white;text-decoration:none;border-radius:4px;">💳 Commander</a>
-        </form>
-    <?php endif; ?>
+                    <?php foreach ($articles as $item): ?>
+                        <tr>
+                            <td>
+                                <?php if ($item['image_url']): ?>
+                                    <img src="<?= htmlspecialchars($item['image_url']) ?>" class="product-image">
+                                <?php endif; ?>
+                            </td>
+                            <td><?= htmlspecialchars($item['name']) ?></td>
+                            <td><?= number_format($item['price'], 2) ?> €</td>
+                            <td>
+                                <input type="number" class="quantity-input" name="quantities[<?= $item['cart_id'] ?>]" value="<?= $item['quantity'] ?>" min="1" max="<?= $item['stock'] ?>">
+                            </td>
+                            <td><?= $item['stock'] ?></td>
+                            <td><?= number_format($item['price'] * $item['quantity'], 2) ?> €</td>
+                            <td><a href="?delete=<?= $item['cart_id'] ?>" class="delete-btn">❌ Supprimer</a></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </table>
+
+                <div class="cart-summary">
+                    <p class="total-amount">Total : <?= number_format($total, 2) ?> €</p>
+                    <div class="action-buttons">
+                        <button type="submit" class="update-btn">🆙 Mettre à jour</button>
+                        <a href="/cart/validate.php" class="checkout-btn">💳 Commander</a>
+                    </div>
+                </div>
+            </form>
+        <?php endif; ?>
+    </div>
 </body>
 </html>

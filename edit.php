@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
         $mysqli->query("INSERT INTO Stock (article_id, quantity) VALUES ($article_id, $stock)");
     }
 
-    echo "<p>Article mis à jour avec succès.</p>";
+    echo "<p class='success-message'>Article mis à jour avec succès.</p>";
     $article = $mysqli->query("SELECT * FROM Article WHERE id = $article_id")->fetch_assoc();
 }
 
@@ -119,12 +119,19 @@ $current_stock = $stock_data ? $stock_data['quantity'] : 0;
                 <input type="number" name="stock" value="<?= $current_stock ?>" required>
             </div>
 
-            <button type="submit" name="update">Mettre à jour</button>
+            <div class="button-group">
+                <button type="submit" name="update">Mettre à jour</button>
+            </div>
         </form>
 
         <form method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet article ?')" class="delete-form">
             <button type="submit" name="delete">Supprimer l'article</button>
         </form>
+
+        <div class="navigation-buttons">
+            <a href="/" class="nav-button">Retour à l'accueil</a>
+            <a href="/article.php?id=<?= $article_id ?>" class="nav-button">Voir l'article</a>
+        </div>
     </div>
 </body>
 </html>
