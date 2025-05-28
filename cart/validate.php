@@ -1,8 +1,8 @@
 <?php
 session_start();
-include 'includes/auth.php';
+include '../includes/auth.php';
 
-$mysqli = new mysqli("localhost", "root", "root", "php_exam_db");
+$mysqli = new mysqli("localhost", "root", "", "php_exam_db");
 if ($mysqli->connect_error) {
     die("Erreur de connexion: " . $mysqli->connect_error);
 }
@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $balance_result->fetch_assoc();
 
     if ($user['balance'] < $total) {
-        echo "<p>Solde insuffisant pour valider la commande.</p>";
+        $error_message = "Solde insuffisant pour valider la commande.";
     } else {
         // Débiter le solde
         $mysqli->query("UPDATE User SET balance = balance - $total WHERE id = $user_id");
@@ -90,19 +90,40 @@ $result = $mysqli->query("
 $row = $result->fetch_assoc();
 $total = $row['total'] ?? 0;
 ?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validation de commande</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h2>Confirmation de la commande</h2>
+    
+    <?php if (isset($error_message)): ?>
+        <div class="error-message"><?= $error_message ?></div>
+    <?php endif; ?>
 
-<h2>Confirmation de la commande</h2>
-<p>Total du panier : <strong><?= number_format($total, 2) ?> €</strong></p>
+    <div class="total-display">
+        <p>Total du panier : <strong><?= number_format($total, 2) ?> €</strong></p>
+    </div>
 
-<form method="POST">
-    <label>Adresse de facturation :</label><br>
-    <input type="text" name="billing_address" required><br>
+    <form method="POST">
+        <label>Adresse de facturation :</label>
+        <input type="text" name="billing_address" required>
 
-    <label>Ville :</label><br>
-    <input type="text" name="billing_city" required><br>
+        <label>Ville :</label>
+        <input type="text" name="billing_city" required>
 
-    <label>Code postal :</label><br>
-    <input type="text" name="billing_postal_code" required><br><br>
+        <label>Code postal :</label>
+        <input type="text" name="billing_postal_code" required>
 
-    <button type="submit">Valider la commande</button>
-</form>
+        <button type="submit">Valider la commande</button>
+    </form>
+
+    <div class="button-container">
+        <a href="/index.php" class="home-button">Retour à l'accueil</a>
+    </div>
+</body>
+</html>
