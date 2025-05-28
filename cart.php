@@ -161,7 +161,7 @@ while ($row = $result->fetch_assoc()) {
             </table>
             <p><strong>Total :</strong> <?= number_format($total, 2) ?> €</p>
             <button type="submit">🆙 Mettre à jour</button>
-            <button type="submit" name="checkout">💳 Commander</button>
+            <a href="/cart/validate.php" style="display:inline-block;padding:8px 12px;background:#4CAF50;color:white;text-decoration:none;border-radius:4px;">💳 Commander</a>
         </form>
     <?php endif; ?>
 </body>

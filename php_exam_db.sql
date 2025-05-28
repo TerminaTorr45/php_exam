@@ -59,3 +59,14 @@ CREATE TABLE Invoice (
     FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE
 );
 
+CREATE TABLE CartArchive (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    article_id INT NOT NULL,
+    quantity INT NOT NULL,
+    invoice_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES User(id),
+    FOREIGN KEY (article_id) REFERENCES Article(id),
+    FOREIGN KEY (invoice_id) REFERENCES Invoice(id)
+);

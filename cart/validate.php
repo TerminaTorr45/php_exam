@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $city = $_POST['billing_city'];
     $postal_code = $_POST['billing_postal_code'];
 
-    // Obtenir le total du panier
+    // Total du panier
     $result = $mysqli->query("
         SELECT SUM(A.price * C.quantity) AS total
         FROM Cart C
@@ -46,22 +46,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ");
         $stmt->bind_param("idsss", $user_id, $total, $address, $city, $postal_code);
         $stmt->execute();
+        $invoice_id = $stmt->insert_id;
 
-        // Mettre à jour le stock
+        // Mettre à jour le stock et archiver les articles
         $cart_items = $mysqli->query("
             SELECT article_id, quantity FROM Cart WHERE user_id = $user_id
         ");
         while ($item = $cart_items->fetch_assoc()) {
+            // Mise à jour du stock
             $mysqli->query("
                 UPDATE Stock SET quantity = quantity - {$item['quantity']}
                 WHERE article_id = {$item['article_id']}
             ");
+
+            // Archivage dans CartArchive
+            $archive_stmt = $mysqli->prepare("
+                INSERT INTO CartArchive (user_id, article_id, quantity, invoice_id)
+                VALUES (?, ?, ?, ?)
+            ");
+            $archive_stmt->bind_param("iiii", $user_id, $item['article_id'], $item['quantity'], $invoice_id);
+            $archive_stmt->execute();
         }
 
         // Vider le panier
         $mysqli->query("DELETE FROM Cart WHERE user_id = $user_id");
 
-        echo "<p>Commande validée et facture générée avec succès.</p>";
+        // Stocker l'ID de la facture pour le récapitulatif
+        $_SESSION['invoice_id'] = $invoice_id;
+
+        // Rediriger vers la page de récapitulatif
+        header("Location: order_summary.php");
         exit;
     }
 }

@@ -76,6 +76,12 @@ $articles_stmt = $mysqli->prepare("SELECT * FROM Article WHERE author_id = ? ORD
 $articles_stmt->bind_param("i", $view_user_id);
 $articles_stmt->execute();
 $articles_result = $articles_stmt->get_result();
+
+// Récupération des factures
+$invoices_stmt = $mysqli->prepare("SELECT * FROM Invoice WHERE user_id = ? ORDER BY transaction_date DESC");
+$invoices_stmt->bind_param("i", $view_user_id);
+$invoices_stmt->execute();
+$invoices_result = $invoices_stmt->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -230,9 +236,8 @@ $articles_result = $articles_stmt->get_result();
         <p><strong>Email :</strong> <?php echo htmlspecialchars($user['email']); ?></p>
     <?php endif; ?>
 
-    <h3>Articles publiés</h3>
     <h3>Solde : <?php echo number_format($user['balance'], 2, ',', ' '); ?> €</h3>
-
+    
     <?php if ($view_user_id === $current_user_id): ?>
         <form method="POST" style="margin-bottom: 2rem;">
             <input type="hidden" name="add_funds" value="1">
@@ -242,8 +247,9 @@ $articles_result = $articles_stmt->get_result();
             </div>
             <button type="submit">Ajouter</button>
         </form>
-    <?php endif; ?>
-
+        <?php endif; ?>
+        
+        <h3>Articles publiés</h3>
     <ul>
         <?php while ($article = $articles_result->fetch_assoc()): ?>
             <li>
@@ -253,6 +259,23 @@ $articles_result = $articles_stmt->get_result();
         <?php endwhile; ?>
         <?php if ($articles_result->num_rows === 0): ?>
             <li>Aucun article publié.</li>
+        <?php endif; ?>
+    </ul>
+
+    <h3>Historique des factures</h3>
+    <ul>
+        <?php if ($invoices_result->num_rows > 0): ?>
+            <?php while ($invoice = $invoices_result->fetch_assoc()): ?>
+                <li>
+                    <strong><?php echo number_format($invoice['amount'], 2, ',', ' '); ?> €</strong> —
+                    <?php echo htmlspecialchars($invoice['billing_address']); ?>,
+                    <?php echo htmlspecialchars($invoice['billing_city']); ?>
+                    <?php echo htmlspecialchars($invoice['billing_postal_code']); ?> —
+                    le <?php echo date("d/m/Y H:i", strtotime($invoice['created_at'])); ?>
+                </li>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <li>Aucune facture trouvée.</li>
         <?php endif; ?>
     </ul>
 </div>
