@@ -90,6 +90,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_SESSION['user_id'])) {
             <?php else: ?>
                 <p style="color:red;"><strong>Rupture de stock.</strong></p>
             <?php endif; ?>
+
+            <?php if ($_SESSION['user_id'] == $article['author_id']): ?>
+                <p><a href="edit.php?id=<?= $article_id ?>">✏️ Modifier l'article</a></p>
+            <?php endif; ?>
         <?php else: ?>
             <p><a href="login.php">Connectez-vous</a> pour ajouter cet article à votre panier.</p>
         <?php endif; ?>
