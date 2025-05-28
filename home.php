@@ -7,7 +7,20 @@ if ($mysqli->connect_error) {
     die("Erreur de connexion : " . $mysqli->connect_error);
 }
 
-// Requête pour récupérer les articles et leur auteur
+// Vérifie si l'utilisateur est connecté
+$is_admin = false;
+if (isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id'];
+    $user_query = $mysqli->prepare("SELECT role FROM User WHERE id = ?");
+    $user_query->bind_param("i", $user_id);
+    $user_query->execute();
+    $user_result = $user_query->get_result();
+    if ($user_row = $user_result->fetch_assoc()) {
+        $is_admin = ($user_row['role'] === 'admin');
+    }
+}
+
+// Récupère les articles
 $query = "
     SELECT A.id, A.name, A.description, A.price, A.published_at, A.image_url, U.username AS author
     FROM Article A
@@ -141,43 +154,46 @@ $result = $mysqli->query($query);
     </style>
 </head>
 <body>
-    <header class="header">
-        <h1>🏠 SNEAKER MARKET</h1>
-        <div>
-            <a href="sell.php">Vendre</a>
-            <a href="account.php">Mon compte</a>
-            <a href="logout.php">Se déconnecter</a>
-        </div>
-    </header>
-
-    <div class="container">
-        <div class="products-grid">
-            <?php
-            if ($result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    echo "<a href='detail.php?id=" . $row['id'] . "' class='product-card'>";
-                    if (!empty($row['image_url'])) {
-                        echo "<img src='" . htmlspecialchars($row['image_url']) . "' alt='" . htmlspecialchars($row['name']) . "' class='product-image'>";
-                    } else {
-                        echo "<div class='product-image'></div>";
-                    }
-                    echo "<div class='product-info'>";
-                    echo "<h2 class='product-name'>" . htmlspecialchars($row['name']) . "</h2>";
-                    echo "<div class='product-price'>" . number_format($row['price'], 2) . " €</div>";
-                    echo "<p class='product-description'>" . nl2br(htmlspecialchars($row['description'])) . "</p>";
-                    echo "<div class='product-meta'>";
-                    echo "Publié par " . htmlspecialchars($row['author']) . " le " . $row['published_at'];
-                    echo "</div>";
-                    echo "</div>";
-                    echo "</a>";
-                }
-            } else {
-                echo "<div class='no-products'>Aucun article en vente.</div>";
-            }
-
-            $mysqli->close();
-            ?>
-        </div>
+<header class="header">
+    <h1>🏠 SNEAKER MARKET</h1>
+    <div>
+        <a href="sell.php">Vendre</a>
+        <a href="account.php">Mon compte</a>
+        <?php if ($is_admin): ?>
+            <a href="admin.php" style="background-color: crimson; color: white;">Admin</a>
+        <?php endif; ?>
+        <a href="logout.php">Se déconnecter</a>
     </div>
+</header>
+
+<div class="container">
+    <div class="products-grid">
+        <?php
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                echo "<a href='detail.php?id=" . $row['id'] . "' class='product-card'>";
+                if (!empty($row['image_url'])) {
+                    echo "<img src='" . htmlspecialchars($row['image_url']) . "' alt='" . htmlspecialchars($row['name']) . "' class='product-image'>";
+                } else {
+                    echo "<div class='product-image'></div>";
+                }
+                echo "<div class='product-info'>";
+                echo "<h2 class='product-name'>" . htmlspecialchars($row['name']) . "</h2>";
+                echo "<div class='product-price'>" . number_format($row['price'], 2) . " €</div>";
+                echo "<p class='product-description'>" . nl2br(htmlspecialchars($row['description'])) . "</p>";
+                echo "<div class='product-meta'>";
+                echo "Publié par " . htmlspecialchars($row['author']) . " le " . $row['published_at'];
+                echo "</div>";
+                echo "</div>";
+                echo "</a>";
+            }
+        } else {
+            echo "<div class='no-products'>Aucun article en vente.</div>";
+        }
+
+        $mysqli->close();
+        ?>
+    </div>
+</div>
 </body>
 </html>

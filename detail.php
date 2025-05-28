@@ -12,7 +12,7 @@ $article_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 // Récupération des infos de l'article
 $stmt = $mysqli->prepare("
-    SELECT A.*, U.username AS author, S.quantity 
+    SELECT A.*, U.username AS author, U.id AS author_id, S.quantity 
     FROM Article A 
     LEFT JOIN User U ON A.author_id = U.id 
     LEFT JOIN Stock S ON A.id = S.article_id 
@@ -89,6 +89,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_SESSION['user_id'])) {
                 </form>
             <?php else: ?>
                 <p style="color:red;"><strong>Rupture de stock.</strong></p>
+            <?php endif; ?>
+
+            <?php if ($_SESSION['user_id'] == $article['author_id']): ?>
+                <p>
+                    <a href="edit.php?id=<?= $article['id'] ?>" style="background:#000; color:#fff; padding:0.5rem 1rem; border-radius:5px; text-decoration:none;">
+                        ✏️ Modifier l'article
+                    </a>
+                </p>
             <?php endif; ?>
         <?php else: ?>
             <p><a href="login.php">Connectez-vous</a> pour ajouter cet article à votre panier.</p>

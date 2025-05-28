@@ -58,3 +58,4 @@ CREATE TABLE Invoice (
     billing_postal_code VARCHAR(20),
     FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE
 );
+

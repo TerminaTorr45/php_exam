@@ -1,64 +1,73 @@
 <?php
 session_start();
 
-// Vérification si l'utilisateur est connecté
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit();
-}
-
 // Connexion à la base de données
 $mysqli = new mysqli("localhost", "root", "", "php_exam_db");
 if ($mysqli->connect_error) {
     die("Erreur de connexion : " . $mysqli->connect_error);
 }
 
-// Récupération des informations de l'utilisateur
-$user_id = $_SESSION['user_id'];
-$query = "SELECT * FROM User WHERE id = ?";
-$stmt = $mysqli->prepare($query);
-$stmt->bind_param("i", $user_id);
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit();
+}
+
+$current_user_id = $_SESSION['user_id'];
+$view_user_id = isset($_GET['id']) ? intval($_GET['id']) : $current_user_id;
+
+// Récupération des infos utilisateur
+$stmt = $mysqli->prepare("SELECT * FROM User WHERE id = ?");
+$stmt->bind_param("i", $view_user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 
-// Traitement du formulaire de mise à jour
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (!$user) {
+    die("Utilisateur non trouvé.");
+}
+
+// Mise à jour si c’est le propriétaire du compte
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $view_user_id === $current_user_id) {
     $username = $_POST['username'];
     $email = $_POST['email'];
-    
-    $update_query = "UPDATE User SET username = ?, email = ? WHERE id = ?";
-    $update_stmt = $mysqli->prepare($update_query);
-    $update_stmt->bind_param("ssi", $username, $email, $user_id);
-    
-    if ($update_stmt->execute()) {
-        $success_message = "Vos informations ont été mises à jour avec succès !";
-        // Mise à jour des données affichées
+    $password = !empty($_POST['password']) ? password_hash($_POST['password'], PASSWORD_DEFAULT) : null;
+
+    if ($password) {
+        $update = $mysqli->prepare("UPDATE User SET username = ?, email = ?, password = ? WHERE id = ?");
+        $update->bind_param("sssi", $username, $email, $password, $current_user_id);
+    } else {
+        $update = $mysqli->prepare("UPDATE User SET username = ?, email = ? WHERE id = ?");
+        $update->bind_param("ssi", $username, $email, $current_user_id);
+    }
+
+    if ($update->execute()) {
+        $success_message = "Mise à jour réussie.";
         $user['username'] = $username;
         $user['email'] = $email;
     } else {
-        $error_message = "Une erreur est survenue lors de la mise à jour.";
+        $error_message = "Erreur lors de la mise à jour.";
     }
 }
+
+// Récupération des articles
+$articles_stmt = $mysqli->prepare("SELECT * FROM Article WHERE author_id = ? ORDER BY published_at DESC");
+$articles_stmt->bind_param("i", $view_user_id);
+$articles_stmt->execute();
+$articles_result = $articles_stmt->get_result();
 ?>
 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Mon Compte - SNEAKER MARKET</title>
+    <title>Compte - SNEAKER MARKET</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-        }
-
         body {
             background-color: #f5f5f5;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
             color: #333;
-            line-height: 1.6;
         }
 
         .header {
@@ -70,18 +79,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             align-items: center;
         }
 
-        .header h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
         .header a {
             color: white;
             text-decoration: none;
-            padding: 0.5rem 1rem;
+            margin-left: 1rem;
             border: 1px solid white;
+            padding: 0.5rem 1rem;
             border-radius: 4px;
-            transition: all 0.3s ease;
         }
 
         .header a:hover {
@@ -92,15 +96,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .container {
             max-width: 800px;
             margin: 2rem auto;
-            padding: 2rem;
             background: white;
+            padding: 2rem;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        h2 {
-            margin-bottom: 2rem;
-            color: #000;
+        h2, h3 {
+            margin-bottom: 1rem;
         }
 
         .form-group {
@@ -109,27 +112,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         label {
             display: block;
+            font-weight: bold;
             margin-bottom: 0.5rem;
-            font-weight: 600;
         }
 
-        input {
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
             width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 0.6rem;
             font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
 
         button {
             background-color: #000;
             color: white;
-            padding: 0.8rem 1.5rem;
+            padding: 0.7rem 1.5rem;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
+            font-weight: bold;
         }
 
         button:hover {
@@ -142,52 +146,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 4px;
         }
 
-        .success {
+        .message.success {
             background-color: #d4edda;
             color: #155724;
-            border: 1px solid #c3e6cb;
         }
 
-        .error {
+        .message.error {
             background-color: #f8d7da;
             color: #721c24;
-            border: 1px solid #f5c6cb;
+        }
+
+        ul {
+            list-style: disc inside;
+            padding-left: 0;
+        }
+
+        ul li {
+            padding: 0.5rem 0;
         }
     </style>
 </head>
 <body>
-    <header class="header">
-        <h1><a href="home.php" style="color: white; text-decoration: none;">🏠 SNEAKER MARKET</a></h1>
-        <div>
-            <a href="home.php" style="margin-right: 1rem;">Accueil</a>
-            <a href="logout.php">Se déconnecter</a>
-        </div>
-    </header>
+<header class="header">
+    <h1><a href="home.php">🏠 SNEAKER MARKET</a></h1>
+    <div>
+        <a href="home.php">Accueil</a>
+        <a href="logout.php">Se déconnecter</a>
+    </div>
+</header>
 
-    <div class="container">
-        <h2>Mon Compte</h2>
-        
-        <?php if (isset($success_message)): ?>
-            <div class="message success"><?php echo $success_message; ?></div>
-        <?php endif; ?>
+<div class="container">
+    <h2>Compte de <?php echo htmlspecialchars($user['username']); ?></h2>
 
-        <?php if (isset($error_message)): ?>
-            <div class="message error"><?php echo $error_message; ?></div>
-        <?php endif; ?>
+    <?php if (isset($success_message)): ?>
+        <div class="message success"><?php echo $success_message; ?></div>
+    <?php endif; ?>
 
-        <form method="POST" action="">
+    <?php if (isset($error_message)): ?>
+        <div class="message error"><?php echo $error_message; ?></div>
+    <?php endif; ?>
+
+    <?php if ($view_user_id === $current_user_id): ?>
+        <form method="POST">
             <div class="form-group">
                 <label for="username">Nom d'utilisateur</label>
                 <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($user['username']); ?>" required>
             </div>
-
             <div class="form-group">
-                <label for="email">Email</label>
+                <label for="email">Adresse email</label>
                 <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
             </div>
-
-            <button type="submit">Mettre à jour mes informations</button>
+            <div class="form-group">
+                <label for="password">Nouveau mot de passe (laisser vide pour ne pas changer)</label>
+                <input type="password" id="password" name="password">
+            </div>
+            <button type="submit">Mettre à jour</button>
         </form>
-    </div>
+    <?php else: ?>
+        <p><strong>Email :</strong> <?php echo htmlspecialchars($user['email']); ?></p>
+    <?php endif; ?>
+
+    <h3>Articles publiés</h3>
+    <ul>
+        <?php while ($article = $articles_result->fetch_assoc()): ?>
+            <li>
+                <strong><?php echo htmlspecialchars($article['name']); ?></strong> —
+                <?php echo date("d/m/Y H:i", strtotime($article['published_at'])); ?>
+            </li>
+        <?php endwhile; ?>
+        <?php if ($articles_result->num_rows === 0): ?>
+            <li>Aucun article publié.</li>
+        <?php endif; ?>
+    </ul>
+</div>
 </body>
 </html>
