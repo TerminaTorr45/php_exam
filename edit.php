@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
         $mysqli->query("INSERT INTO Stock (article_id, quantity) VALUES ($article_id, $stock)");
     }
 
-    echo "<p class='success-message'>Article mis à jour avec succès.</p>";
+    $success_message = "Article mis à jour avec succès.";
     $article = $mysqli->query("SELECT * FROM Article WHERE id = $article_id")->fetch_assoc();
 }
 
@@ -88,10 +88,24 @@ $current_stock = $stock_data ? $stock_data['quantity'] : 0;
     <title>Modifier l'article</title>
     <link rel="stylesheet" href="css/edit.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .success-message {
+            text-align: center;
+            color: #28a745;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #d4edda;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h2>Modifier l'article</h2>
+
+        <?php if (isset($success_message)): ?>
+            <div class="success-message"><?= $success_message ?></div>
+        <?php endif; ?>
 
         <form method="POST" class="edit-form">
             <div class="form-group">

@@ -245,7 +245,7 @@ $result = $stmt->get_result();
 </head>
 <body>
 <header class="header">
-    <h1>🏠 SNEAKER MARKET</h1>
+    <h1>SNEAKER MARKET</h1>
     <form class="search-form" method="GET" action="home.php">
         <input type="text" name="search" class="search-input" placeholder="Rechercher un article..." value="<?php echo htmlspecialchars($search); ?>">
         <button type="submit" class="search-button">🔍</button>
