@@ -70,3 +70,12 @@ CREATE TABLE CartArchive (
     FOREIGN KEY (article_id) REFERENCES Article(id),
     FOREIGN KEY (invoice_id) REFERENCES Invoice(id)
 );
+CREATE TABLE IF NOT EXISTS password_resets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    token VARCHAR(64) NOT NULL,
+    expiry DATETIME NOT NULL,
+    used TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE
+); 

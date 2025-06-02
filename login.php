@@ -137,6 +137,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <button type="submit">Se connecter</button>
         </form>
         <div style="text-align: center; margin-top: 1rem;">
+            <a href="forgot_password.php" style="color: #666; text-decoration: none; font-size: 0.9rem; display: block; margin-bottom: 1rem;">
+                Mot de passe oublié ?
+            </a>
             <a href="register.php" style="text-decoration: none;">
                 <button type="button" style="background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);">Créer un compte</button>
             </a>

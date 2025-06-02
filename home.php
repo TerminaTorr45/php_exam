@@ -168,28 +168,78 @@ $result = $stmt->get_result();
             display: flex;
             gap: 0.5rem;
             margin: 0 1rem;
-        }
-
-        .search-input {
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
             padding: 0.5rem;
-            border: none;
-            border-radius: 4px;
-            width: 300px;
-            font-size: 1rem;
-        }
-
-        .search-button {
-            padding: 0.5rem 1rem;
-            background-color: white;
-            color: black;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
             transition: all 0.3s ease;
         }
 
+        .search-form:focus-within {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .search-input {
+            padding: 0.8rem 1.2rem;
+            border: none;
+            border-radius: 25px;
+            width: 300px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .search-input:focus {
+            width: 320px;
+            background: white;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: #999;
+            font-style: italic;
+        }
+
+        .search-button {
+            padding: 0.8rem 1.2rem;
+            background: white;
+            color: #333;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
         .search-button:hover {
-            background-color: #f0f0f0;
+            background: #f0f0f0;
+            transform: scale(1.05);
+        }
+
+        .search-button:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 768px) {
+            .search-form {
+                margin: 0.5rem;
+                width: 100%;
+            }
+
+            .search-input {
+                width: 100%;
+            }
+
+            .search-input:focus {
+                width: 100%;
+            }
         }
     </style>
 </head>
