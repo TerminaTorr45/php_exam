@@ -21,13 +21,25 @@ if (isset($_SESSION['user_id'])) {
 }
 
 // Récupère les articles
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $query = "
     SELECT A.id, A.name, A.description, A.price, A.published_at, A.image_url, U.username AS author
     FROM Article A
     LEFT JOIN User U ON A.author_id = U.id
-    ORDER BY A.published_at DESC
+    WHERE 1=1
 ";
-$result = $mysqli->query($query);
+if (!empty($search)) {
+    $search_term = '%' . $mysqli->real_escape_string($search) . '%';
+    $query .= " AND (A.name LIKE ? OR A.description LIKE ?)";
+}
+$query .= " ORDER BY A.published_at DESC";
+
+$stmt = $mysqli->prepare($query);
+if (!empty($search)) {
+    $stmt->bind_param("ss", $search_term, $search_term);
+}
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -151,11 +163,43 @@ $result = $mysqli->query($query);
             font-size: 1.2rem;
             color: #666;
         }
+
+        .search-form {
+            display: flex;
+            gap: 0.5rem;
+            margin: 0 1rem;
+        }
+
+        .search-input {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 4px;
+            width: 300px;
+            font-size: 1rem;
+        }
+
+        .search-button {
+            padding: 0.5rem 1rem;
+            background-color: white;
+            color: black;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-button:hover {
+            background-color: #f0f0f0;
+        }
     </style>
 </head>
 <body>
 <header class="header">
     <h1>🏠 SNEAKER MARKET</h1>
+    <form class="search-form" method="GET" action="home.php">
+        <input type="text" name="search" class="search-input" placeholder="Rechercher un article..." value="<?php echo htmlspecialchars($search); ?>">
+        <button type="submit" class="search-button">🔍</button>
+    </form>
     <div>
         <a href="sell.php">Vendre</a>
         <a href="account.php">Mon compte</a>
