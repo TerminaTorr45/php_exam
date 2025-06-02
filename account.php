@@ -16,7 +16,7 @@ $current_user_id = $_SESSION['user_id'];
 $view_user_id = isset($_GET['id']) ? intval($_GET['id']) : $current_user_id;
 
 // Récupération des infos utilisateur
-$stmt = $mysqli->prepare("SELECT * FROM User WHERE id = ?");
+$stmt = $mysqli->prepare("SELECT id, username, email, COALESCE(balance, 0) as balance FROM User WHERE id = ?");
 $stmt->bind_param("i", $view_user_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -53,10 +53,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile']) && 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_funds']) && $view_user_id === $current_user_id) {
     $amount = floatval($_POST['amount']);
     if ($amount > 0) {
-        $update = $mysqli->prepare("UPDATE User SET balance = balance + ? WHERE id = ?");
+        $update = $mysqli->prepare("UPDATE User SET balance = COALESCE(balance, 0) + ? WHERE id = ?");
         $update->bind_param("di", $amount, $current_user_id);
         if ($update->execute()) {
-            $stmt = $mysqli->prepare("SELECT * FROM User WHERE id = ?");
+            // Mettre à jour les informations de l'utilisateur
+            $stmt = $mysqli->prepare("SELECT id, username, email, COALESCE(balance, 0) as balance FROM User WHERE id = ?");
             $stmt->bind_param("i", $view_user_id);
             $stmt->execute();
             $result = $stmt->get_result();
@@ -78,7 +79,18 @@ $articles_stmt->execute();
 $articles_result = $articles_stmt->get_result();
 
 // Récupération des factures
-$invoices_stmt = $mysqli->prepare("SELECT * FROM Invoice WHERE user_id = ? ORDER BY transaction_date DESC");
+$invoices_stmt = $mysqli->prepare("
+    SELECT 
+        id,
+        amount,
+        billing_address,
+        billing_city,
+        billing_postal_code,
+        COALESCE(transaction_date, NOW()) as transaction_date
+    FROM Invoice 
+    WHERE user_id = ? 
+    ORDER BY transaction_date DESC
+");
 $invoices_stmt->bind_param("i", $view_user_id);
 $invoices_stmt->execute();
 $invoices_result = $invoices_stmt->get_result();
@@ -236,7 +248,7 @@ $invoices_result = $invoices_stmt->get_result();
         <p><strong>Email :</strong> <?php echo htmlspecialchars($user['email']); ?></p>
     <?php endif; ?>
 
-    <h3>Solde : <?php echo number_format($user['balance'], 2, ',', ' '); ?> €</h3>
+    <h3>Solde : <?php echo number_format($user['balance'] ?? 0, 2, ',', ' '); ?> €</h3>
     
     <?php if ($view_user_id === $current_user_id): ?>
         <form method="POST" style="margin-bottom: 2rem;">
@@ -271,7 +283,7 @@ $invoices_result = $invoices_stmt->get_result();
                     <?php echo htmlspecialchars($invoice['billing_address']); ?>,
                     <?php echo htmlspecialchars($invoice['billing_city']); ?>
                     <?php echo htmlspecialchars($invoice['billing_postal_code']); ?> —
-                    le <?php echo date("d/m/Y H:i", strtotime($invoice['created_at'])); ?>
+                    le <?php echo date("d/m/Y H:i", strtotime($invoice['transaction_date'])); ?>
                 </li>
             <?php endwhile; ?>
         <?php else: ?>

@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Total du panier
     $result = $mysqli->query("
-        SELECT SUM(A.price * C.quantity) AS total
+        SELECT COALESCE(SUM(A.price * C.quantity), 0) AS total
         FROM Cart C
         JOIN Article A ON C.article_id = A.id
         WHERE C.user_id = $user_id
@@ -33,11 +33,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $balance_result = $mysqli->query("SELECT balance FROM User WHERE id = $user_id");
     $user = $balance_result->fetch_assoc();
 
-    if ($user['balance'] < $total) {
+    if (!$total || $total <= 0) {
+        $error_message = "Le panier est vide ou le total est invalide.";
+    } else if ($user['balance'] < $total) {
         $error_message = "Solde insuffisant pour valider la commande.";
     } else {
         // Débiter le solde
-        $mysqli->query("UPDATE User SET balance = balance - $total WHERE id = $user_id");
+        $update_balance = $mysqli->prepare("UPDATE User SET balance = balance - ? WHERE id = ?");
+        $update_balance->bind_param("di", $total, $user_id);
+        $update_balance->execute();
+        $update_balance->close();
 
         // Créer une facture
         $stmt = $mysqli->prepare("
@@ -74,6 +79,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Stocker l'ID de la facture pour le récapitulatif
         $_SESSION['invoice_id'] = $invoice_id;
 
+        // Récupérer les informations de l'utilisateur et de la commande pour l'email
+        $user_info = $mysqli->query("SELECT email, username FROM User WHERE id = $user_id")->fetch_assoc();
+        
+        // Récupérer les articles de la commande
+        $order_items = $mysqli->query("
+            SELECT A.name, A.price, C.quantity
+            FROM CartArchive C
+            JOIN Article A ON C.article_id = A.id
+            WHERE C.invoice_id = $invoice_id
+        ");
+
+        // Préparer le contenu de l'email
+        $items_html = "";
+        while ($item = $order_items->fetch_assoc()) {
+            $items_html .= "
+                <div style='background: #f5f5f5; padding: 10px; margin: 5px 0; border-radius: 5px;'>
+                    <p style='margin: 5px 0;'><strong>" . htmlspecialchars($item['name']) . "</strong></p>
+                    <p style='margin: 5px 0;'>Quantité: " . $item['quantity'] . "</p>
+                    <p style='margin: 5px 0;'>Prix unitaire: " . number_format($item['price'], 2) . " €</p>
+                    <p style='margin: 5px 0;'>Total: " . number_format($item['price'] * $item['quantity'], 2) . " €</p>
+                </div>";
+        }
+
+        // Envoyer l'email de confirmation
+        $subject = "Confirmation de votre commande - SNEAKER MARKET";
+        $body = "
+            <h2>Bonjour " . htmlspecialchars($user_info['username']) . ",</h2>
+            <p>Nous vous confirmons votre commande #" . $invoice_id . ".</p>
+            
+            <h3>Détails de la commande :</h3>
+            " . $items_html . "
+            
+            <div style='margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px;'>
+                <p><strong>Adresse de livraison :</strong></p>
+                <p>" . htmlspecialchars($address) . "</p>
+                <p>" . htmlspecialchars($city) . " " . htmlspecialchars($postal_code) . "</p>
+            </div>
+            
+            <div style='margin-top: 20px;'>
+                <p><strong>Total de la commande : " . number_format($total, 2) . " €</strong></p>
+            </div>
+            
+            <p style='margin-top: 20px;'>Merci de votre confiance !</p>
+            <p>L'équipe SNEAKER MARKET</p>
+        ";
+
+        require_once '../includes/mail_config.php';
+        sendMail($user_info['email'], $subject, $body);
+
         // Rediriger vers la page de récapitulatif
         header("Location: order_summary.php");
         exit;
@@ -82,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Récupérer le total actuel
 $result = $mysqli->query("
-    SELECT SUM(A.price * C.quantity) AS total
+    SELECT COALESCE(SUM(A.price * C.quantity), 0) AS total
     FROM Cart C
     JOIN Article A ON C.article_id = A.id
     WHERE C.user_id = $user_id
