@@ -1,5 +1,7 @@
 <?php
 session_start();
+require_once 'includes/mail_config.php';
+
 $mysqli = new mysqli("localhost", "root", "", "php_exam_db");
 
 if ($mysqli->connect_error) {
@@ -20,10 +22,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } else {
         $query = "INSERT INTO User (username, email, password) VALUES ('$username', '$email', '$password')";
         if ($mysqli->query($query)) {
-            $_SESSION['user_id'] = $mysqli->insert_id;
-            $_SESSION['username'] = $username;
-            header("Location: home.php");
-            exit();
+            // Envoi de l'email de bienvenue
+            $subject = "Bienvenue sur SNEAKER MARKET !";
+            $body = "
+                <h2>Bienvenue " . htmlspecialchars($username) . " !</h2>
+                <p>Merci de vous être inscrit sur SNEAKER MARKET.</p>
+                <p>Vous pouvez dès maintenant :</p>
+                <ul>
+                    <li>Parcourir notre catalogue de sneakers</li>
+                    <li>Ajouter des articles à vos favoris</li>
+                    <li>Passer des commandes</li>
+                    <li>Gérer votre profil</li>
+                </ul>
+                <p>Si vous avez des questions, n'hésitez pas à nous contacter.</p>
+                <p>À bientôt sur SNEAKER MARKET !</p>
+            ";
+            
+            if (sendMail($email, $subject, $body)) {
+                $_SESSION['user_id'] = $mysqli->insert_id;
+                $_SESSION['username'] = $username;
+                header("Location: home.php");
+                exit();
+            } else {
+                $message = "Compte créé mais erreur lors de l'envoi de l'email de bienvenue.";
+            }
         } else {
             $message = "Erreur lors de l'inscription.";
         }

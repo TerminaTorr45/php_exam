@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'includes/mail_config.php';
 
 // Connexion à la base de données
 $mysqli = new mysqli("localhost", "root", "", "php_exam_db");
@@ -46,6 +47,31 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_SESSION['user_id'])) {
         $insert->execute();
         $insert->close();
         $message = "✅ Article ajouté au panier.";
+
+        // Récupérer l'email de l'utilisateur
+        $user_stmt = $mysqli->prepare("SELECT email, username FROM User WHERE id = ?");
+        $user_stmt->bind_param("i", $user_id);
+        $user_stmt->execute();
+        $user_result = $user_stmt->get_result();
+        $user = $user_result->fetch_assoc();
+        $user_stmt->close();
+
+        // Envoyer l'email de confirmation
+        $subject = "Article ajouté à votre panier - SNEAKER MARKET";
+        $body = "
+            <h2>Bonjour " . htmlspecialchars($user['username']) . ",</h2>
+            <p>Vous avez ajouté l'article suivant à votre panier :</p>
+            <div style='background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0;'>
+                <h3 style='margin: 0 0 10px 0;'>" . htmlspecialchars($article['name']) . "</h3>
+                <p style='margin: 5px 0;'><strong>Prix :</strong> " . number_format($article['price'], 2) . " €</p>
+                " . (!empty($article['description']) ? "<p style='margin: 5px 0;'><strong>Description :</strong> " . htmlspecialchars($article['description']) . "</p>" : "") . "
+            </div>
+            <p>Vous pouvez consulter votre panier en cliquant sur le lien suivant :</p>
+            <p><a href='http://" . $_SERVER['HTTP_HOST'] . "/cart.php' style='background: #000; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Voir mon panier</a></p>
+            <p>À bientôt sur SNEAKER MARKET !</p>
+        ";
+
+        sendMail($user['email'], $subject, $body);
     } else {
         $message = "ℹ️ Article déjà dans votre panier.";
     }
