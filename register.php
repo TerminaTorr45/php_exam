@@ -123,7 +123,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
         button {
-            background:rgb(59, 181, 48);
+            background: black;
             color: white;
             padding: 1rem;
             border: none;
@@ -136,7 +136,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
         button:hover {
-            background:rgb(44, 44, 44);
             transform: translateY(-2px);
         }
 
@@ -150,14 +149,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
         .login-link a {
-            color: rgb(59, 181, 48);
+            color: rgb(44, 44, 44);
             text-decoration: none;
             font-weight: 500;
             transition: color 0.3s ease;
         }
 
         .login-link a:hover {
-            color: rgb(44, 44, 44);
+            color: rgb(59, 181, 48);
         }
 
         @media (max-width: 480px) {

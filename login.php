@@ -99,7 +99,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
         button {
-            background: linear-gradient(135deg,rgb(75, 246, 59) 0%,rgb(30, 30, 30) 100%);
+            background: black;
             color: white;
             padding: 0.75rem;
             border: none;
@@ -141,7 +141,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 Mot de passe oublié ?
             </a>
             <a href="register.php" style="text-decoration: none;">
-                <button type="button" style="background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);">Créer un compte</button>
+                <button type="button" style="background: black;">Créer un compte</button>
             </a>
         </div>
     </div>

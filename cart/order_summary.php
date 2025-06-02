@@ -1,8 +1,8 @@
 <?php
 session_start();
-include 'includes/auth.php';
+include '../includes/auth.php';
 
-$mysqli = new mysqli("localhost", "root", "root", "php_exam_db");
+$mysqli = new mysqli("localhost", "root", "", "php_exam_db");
 if ($mysqli->connect_error) {
     die("Erreur de connexion: " . $mysqli->connect_error);
 }
@@ -29,32 +29,70 @@ $items_result = $mysqli->query("
     JOIN Article A ON C.article_id = A.id
     WHERE C.invoice_id = $invoice_id
 ");
-
 ?>
-<h2>Récapitulatif de la commande</h2>
-<p><strong>Adresse :</strong> <?= htmlspecialchars($invoice['billing_address']) ?>, <?= htmlspecialchars($invoice['billing_city']) ?> <?= htmlspecialchars($invoice['billing_postal_code']) ?></p>
-<p><strong>Total :</strong> <?= number_format($invoice['amount'], 2) ?> €</p>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Récapitulatif de commande</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/order_summary.css">
+</head>
+<body>
+    <div class="container">
+        <div class="order-header">
+            <h1>Récapitulatif de la commande</h1>
+            <div class="order-status success">Commande confirmée</div>
+        </div>
 
-<h3>Articles achetés :</h3>
-<table border="1" cellpadding="8">
-    <tr>
-        <th>Nom</th>
-        <th>Prix</th>
-        <th>Quantité</th>
-        <th>Total</th>
-    </tr>
-    <?php while ($item = $items_result->fetch_assoc()): ?>
-        <tr>
-            <td><?= htmlspecialchars($item['name']) ?></td>
-            <td><?= number_format($item['price'], 2) ?> €</td>
-            <td><?= $item['quantity'] ?></td>
-            <td><?= number_format($item['price'] * $item['quantity'], 2) ?> €</td>
-        </tr>
-    <?php endwhile; ?>
-</table>
+        <div class="order-details">
+            <div class="shipping-info">
+                <h2>Adresse de livraison</h2>
+                <div class="info-card">
+                    <p><?= htmlspecialchars($invoice['billing_address']) ?></p>
+                    <p><?= htmlspecialchars($invoice['billing_city']) ?> <?= htmlspecialchars($invoice['billing_postal_code']) ?></p>
+                </div>
+            </div>
 
-<!-- Bouton retour à l'accueil -->
-<br>
-<a href="/index.php">
-    <button type="button">Retour à l'accueil</button>
-</a>
+            <div class="order-summary">
+                <h2>Détails de la commande</h2>
+                <div class="info-card">
+                    <div class="summary-row">
+                        <span>Numéro de commande</span>
+                        <span>#<?= $invoice_id ?></span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total</span>
+                        <span class="price"><?= number_format($invoice['amount'], 2) ?> €</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="items-section">
+            <h2>Articles commandés</h2>
+            <div class="items-grid">
+                <?php while ($item = $items_result->fetch_assoc()): ?>
+                    <div class="item-card">
+                        <div class="item-details">
+                            <h3><?= htmlspecialchars($item['name']) ?></h3>
+                            <div class="item-meta">
+                                <span class="quantity">Quantité: <?= $item['quantity'] ?></span>
+                                <span class="price"><?= number_format($item['price'], 2) ?> €</span>
+                            </div>
+                            <div class="item-total">
+                                Total: <?= number_format($item['price'] * $item['quantity'], 2) ?> €
+                            </div>
+                        </div>
+                    </div>
+                <?php endwhile; ?>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="/index.php" class="btn-primary">Retour à l'accueil</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -7,6 +7,10 @@
     --light-gray: #f5f6fa;
     --white: #ffffff;
     --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --button-gradient: linear-gradient(135deg, #3498db, #2980b9);
+    --button-hover-gradient: linear-gradient(135deg, #2980b9, #2c3e50);
+    --nav-button-gradient: linear-gradient(135deg, #95a5a6, #7f8c8d);
+    --nav-button-hover-gradient: linear-gradient(135deg, #7f8c8d, #2c3e50);
 }
 
 /* Reset et styles de base */
@@ -63,6 +67,7 @@ strong {
     background-color: var(--white);
     border-radius: 10px;
     box-shadow: var(--shadow);
+    text-align: center;
 }
 
 /* Image de l'article */
@@ -86,30 +91,70 @@ h2 {
     font-size: 2rem;
 }
 
-p {
+/* p {
     margin: 1rem 0;
     padding: 0.5rem;
     background-color: var(--light-gray);
     border-radius: 5px;
-}
+} */
 
 /* Bouton d'ajout au panier */
 button {
-    background-color: var(--secondary-color);
+    background: var(--button-gradient);
     color: var(--white);
     border: none;
     padding: 1rem 2rem;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 1.1rem;
-    transition: all 0.3s ease;
-    margin: 1rem 0;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    margin: 1rem auto;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    display: block;
 }
 
 button:hover {
-    background-color: var(--primary-color);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow);
+    background: var(--button-hover-gradient);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+}
+
+button:active {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 10px rgba(52, 152, 219, 0.3);
+}
+
+button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+}
+
+button:hover::after {
+    animation: ripple 0.3s ease-out;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(20, 20);
+        opacity: 0;
+    }
 }
 
 /* Message de rupture de stock */
@@ -120,6 +165,58 @@ p[style*="color:red"] {
     padding: 1rem;
     background-color: rgba(231, 76, 60, 0.1);
     border-radius: 5px;
+}
+
+/* Styles pour les liens de navigation */
+a[href*="edit.php"],
+a[href*="home.php"] {
+    display: inline-block;
+    background: var(--nav-button-gradient);
+    color: var(--white);
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    margin: 0.5rem auto;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(127, 140, 141, 0.3);
+}
+
+a[href*="edit.php"]:hover,
+a[href*="home.php"]:hover {
+    background: var(--nav-button-hover-gradient);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(127, 140, 141, 0.4);
+    color: var(--white);
+}
+
+a[href*="edit.php"]:active,
+a[href*="home.php"]:active {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 10px rgba(127, 140, 141, 0.3);
+}
+
+a[href*="edit.php"]::after,
+a[href*="home.php"]::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+}
+
+a[href*="edit.php"]:hover::after,
+a[href*="home.php"]:hover::after {
+    animation: ripple 0.3s ease-out;
 }
 
 /* Responsive design */
