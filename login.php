@@ -125,6 +125,32 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 padding: 1.5rem;
             }
         }
+
+        .password-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-container input {
+            width: 100%;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        .toggle-password:hover {
+            transform: none;
+            box-shadow: none;
+        }
     </style>
 </head>
 <body>
@@ -133,7 +159,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <?php if ($message) echo "<div class='error-message'>$message</div>"; ?>
         <form method="POST" action="login.php">
             <input type="text" name="username" placeholder="Nom d'utilisateur" required>
-            <input type="password" name="password" placeholder="Mot de passe" required>
+            <div class="password-container">
+                <input type="password" name="password" id="password" placeholder="Mot de passe" required>
+                <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
+            </div>
             <button type="submit">Se connecter</button>
         </form>
         <div style="text-align: center; margin-top: 1rem;">
@@ -145,5 +174,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             </a>
         </div>
     </div>
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+        }
+    </script>
 </body>
 </html>
