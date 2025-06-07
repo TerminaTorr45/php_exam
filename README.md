@@ -56,6 +56,11 @@ composer install
 - Assurez-vous que le document root pointe vers le répertoire du projet
 - Configurez les permissions appropriées
 
+5. Lancer le code en local :
+```bash
+php -S localhost:8000
+```
+
 ## 📁 Structure du projet
 
 ```
