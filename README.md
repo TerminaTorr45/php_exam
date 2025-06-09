@@ -28,7 +28,7 @@ Une plateforme e-commerce moderne et robuste développée en PHP, offrant une ex
 - MySQL
 - PHPMailer
 - HTML/CSS
-- JavaScript
+- JavaScript : (Pour PHP-Mailer)
 
 ## 📋 Prérequis
 
@@ -65,6 +65,7 @@ npm i
 ```bash
 php -S localhost:8000
 ```
+PS : Lors de la création de votre compte nous vous conseillons de mettre votre addresse-mail pour être tenue informé des nouveautés 👍
 
 ## 📁 Structure du projet
 
