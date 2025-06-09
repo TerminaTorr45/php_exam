@@ -1,6 +1,6 @@
 # 🛍️ E-Commerce Platform
 
-Une plateforme e-commerce moderne et robuste développée en PHP, offrant une expérience utilisateur complète avec gestion des utilisateurs, panier d'achat, et administration.
+Une plateforme e-commerce moderne et robuste développée en PHP, offrant une expérience utilisateur complète avec gestion des utilisateurs, panier d'achat, et administration...
 
 ## 🌟 Fonctionnalités
 
@@ -40,12 +40,17 @@ Une plateforme e-commerce moderne et robuste développée en PHP, offrant une ex
 
 1. Clonez le repository :
 ```bash
-git clone [URL_DU_REPO]
+git clone [https://github.com/TerminaTorr45/php_exam.git]
 ```
 
 2. Installez les dépendances :
 ```bash
-composer install
+composer install 
+```
+ou
+
+```bash
+npm i 
 ```
 
 3. Configurez la base de données :
@@ -81,19 +86,6 @@ php -S localhost:8000
 - Validation des entrées utilisateur
 - Gestion sécurisée des sessions
 
-## 📝 Licence
-
-Ce projet est sous licence [insérer la licence appropriée]
-
-## 👥 Contribution
-
-Les contributions sont les bienvenues ! N'hésitez pas à :
-1. Fork le projet
-2. Créer une branche pour votre fonctionnalité
-3. Commiter vos changements
-4. Pousser vers la branche
-5. Ouvrir une Pull Request
-
 ## 📧 Contact
 
-Pour toute question ou suggestion, n'hésitez pas à nous contacter à [insérer l'email de contact]
+Pour toute question ou suggestion, n'hésitez pas à nous contacter !
